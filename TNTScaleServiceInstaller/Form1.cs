@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.IO.Compression;
 using System.Configuration.Install;
+using Microsoft.Win32.TaskScheduler;
 
 namespace TNTScaleServiceInstaller
 {
@@ -74,6 +75,7 @@ namespace TNTScaleServiceInstaller
         private void btninstall_Click(object sender, EventArgs e)
         {
             InstallService(outputpath + "\\TNTScaleService.exe");
+            CreateTask(outputpath);
         }
 
         public static void InstallService(string ExeFilename)
@@ -92,5 +94,32 @@ namespace TNTScaleServiceInstaller
             }
         }
 
+        public static void CreateTask(string directory)
+        {
+            try
+            {
+                TaskService ts = new TaskService();
+
+                TaskDefinition td = ts.NewTask();
+                td.RegistrationInfo.Description = "Restarts TNT Scale Service";
+
+                // Add a trigger that, starting now, will fire every day
+                // and repeat every 1 minute.
+                var dt = new DailyTrigger();
+                dt.StartBoundary = DateTime.Now;
+                dt.Repetition.Interval = TimeSpan.FromSeconds(10800);
+                td.Triggers.Add(dt);
+                td.Principal.RunLevel = TaskRunLevel.Highest;
+                td.Settings.AllowDemandStart = true;
+                // Create an action that will launch Notepad whenever the trigger fires
+                td.Actions.Add(new ExecAction(directory + "\\schedule.bat", "c:\\users\\public\\documents\\test.log", null));
+                // Register the task in the root folder
+                ts.RootFolder.RegisterTaskDefinition("TNTScaleServiceRestartTask", td);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
     }
 }
