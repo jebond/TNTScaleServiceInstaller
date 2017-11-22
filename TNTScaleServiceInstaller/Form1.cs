@@ -26,16 +26,17 @@ namespace TNTScaleServiceInstaller
             label1.Text = path;
             outputpath = path;
             serverpath = txtpath.Text;
-            txtdebug.Visible = Visible;
-            txtlog.Visible = Visible;
-            txtdebug.Visible = Visible;
-            pathlabel.Visible = Visible;
-            pathlog.Visible = Visible;
-            txtpath.Visible = Visible;
-            debuglabel.Visible = Visible;
-            btnsaveconfig.Visible = Visible;
-            lblsec.Visible = Visible;
-            txtsec.Visible = Visible;
+            txtdebug.Visible = true;
+            txtlog.Visible = true;
+            txtdebug.Visible = true;
+            pathlabel.Visible = true;
+            pathlog.Visible = true;
+            txtpath.Visible = true;
+            debuglabel.Visible = true;
+            btnsaveconfig.Visible = true;
+            lblsec.Visible = true;
+            txtsec.Visible = true;
+            checkBox1.Visible = true;
         }
 
         private void btnsaveconfig_Click(object sender, EventArgs e)
@@ -119,6 +120,54 @@ namespace TNTScaleServiceInstaller
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                lblapp.Visible = true;
+                lblscale.Visible = true;
+                lblprinter.Visible = true;
+                txtapp.Visible = true;
+                txtscale.Visible = true;
+                txtprinter.Visible = true;
+                btnhosts.Visible = true;
+            }
+            else
+            {
+                lblapp.Visible = false;
+                lblscale.Visible = false;
+                lblprinter.Visible = false;
+                txtapp.Visible = false;
+                txtscale.Visible = false;
+                txtprinter.Visible = false;
+                btnhosts.Visible = false;
+            }
+        }
+
+        private void btnhosts_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (StreamWriter w = File.AppendText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "drivers/etc/hosts")))
+                {
+                    w.WriteLine(txtapp.Text + " apps.trollandtoad.com");
+                    w.WriteLine(txtscale.Text + " scale.trollandtoad.com");
+                    w.WriteLine(txtprinter.Text + " printer.trollandtoad.com");
+                    w.WriteLine(Environment.NewLine);
+                    w.WriteLine(Environment.NewLine);
+
+                }
+                lblstatus.Text = "Host File Updated";
+                lblstatus.Visible = Visible;
+            }
+            catch(Exception ex)
+            {
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
         }
     }
