@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Configuration.Install;
 using Microsoft.Win32.TaskScheduler;
+using System.ServiceProcess;
 
 namespace TNTScaleServiceInstaller
 {
@@ -50,20 +51,18 @@ namespace TNTScaleServiceInstaller
                 string ConfigFile = Properties.Resources.TNTScaleService_exe;
 
                 StringBuilder configbaby = new StringBuilder();
-                configbaby.Append(@"<?xml version='1.0' encoding='utf - 8'?>" + Environment.NewLine + "<configuration>" + Environment.NewLine + "<startup>" + Environment.NewLine + "<supportedRuntime version = 'v4.0' sku = '.NETFramework,Version=v4.6.1' />" + Environment.NewLine + "</startup>" + Environment.NewLine + "<appSettings>" + Environment.NewLine + "");
-                configbaby.Append(@"<add key='WebServiceUrl' value='" + txtpath.Text + "/addweight/'/>" + Environment.NewLine);
-                configbaby.Append(@"<add key = 'LogFileOutput' value = '" + txtlog.Text + "scale.log'" + "/>" + Environment.NewLine);
-                configbaby.Append(@"<add key = 'LogFileOutput' value = '" + txtlog.Text + "http.log'" + "/>" + Environment.NewLine);
-                configbaby.Append(@"<add key = 'DebugMode' value = '" + txtdebug.Text + "'/>" + Environment.NewLine);
-                configbaby.Append(@"<add key='ScaleCheckFrequencyMilliseconds' value='" + txtsec.Text +"' />" + Environment.NewLine);
-                configbaby.Append(@"<add key='ClientSettingsProvider.ServiceUri' value='' />" + Environment.NewLine);
-                configbaby.Append(@"</appSettings>" + Environment.NewLine + "<system.web>" + Environment.NewLine + "<membership defaultProvider='ClientAuthenticationMembershipProvider'>" + Environment.NewLine + "<providers>" + Environment.NewLine + "<add name = 'ClientAuthenticationMembershipProvider' type = 'System.Web.ClientServices.Providers.ClientFormsAuthenticationMembershipProvider, System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' serviceUri = ''/>" + Environment.NewLine + "</providers>" + Environment.NewLine + "</membership>" + Environment.NewLine + "<roleManager defaultProvider = 'ClientRoleProvider' enabled = 'true'>" + Environment.NewLine + "<providers>" + Environment.NewLine + "<add name = 'ClientRoleProvider' type = 'System.Web.ClientServices.Providers.ClientRoleProvider, System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' serviceUri = '' cacheTimeout = '86400'/>" + Environment.NewLine + "</providers>" + Environment.NewLine + "</roleManager>" + Environment.NewLine + "</system.web>" + Environment.NewLine + "</configuration>");
+                configbaby.Append(@"<?xml version=""1.0"" encoding=""utf-8""?>" + Environment.NewLine + "<configuration>" + Environment.NewLine + "<startup>" + Environment.NewLine + @"<supportedRuntime version = ""v4.0"" sku = "".NETFramework,Version=v4.6.1"" />" + Environment.NewLine + "</startup>" + Environment.NewLine + "<appSettings>" + Environment.NewLine + "");
+                configbaby.Append(@"<add key=""WebServiceUrl"" value=""" + txtpath.Text + @"/addweight/""/>" + Environment.NewLine);
+                configbaby.Append(@"<add key = ""LogFileOutput"" value = """ + txtlog.Text + @"scale.log""" + "/>" + Environment.NewLine);
+                configbaby.Append(@"<add key = ""LogFileOutput"" value = """ + txtlog.Text + @"http.log""" + "/>" + Environment.NewLine);
+                configbaby.Append(@"<add key = ""DebugMode"" value = """ + txtdebug.Text + @"""/>" + Environment.NewLine);
+                configbaby.Append(@"<add key=""ScaleCheckFrequencyMilliseconds"" value=""" + txtsec.Text +@""" />" + Environment.NewLine);
+                configbaby.Append(@"<add key=""ClientSettingsProvider.ServiceUri"" value="""" />" + Environment.NewLine);
+                configbaby.Append(@"</appSettings>" + Environment.NewLine + "<system.web>" + Environment.NewLine + @"<membership defaultProvider=""ClientAuthenticationMembershipProvider"">" + Environment.NewLine + "<providers>" + Environment.NewLine + @"<add name = ""ClientAuthenticationMembershipProvider"" type = ""System.Web.ClientServices.Providers.ClientFormsAuthenticationMembershipProvider, System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"" serviceUri = """"/>" + Environment.NewLine + "</providers>" + Environment.NewLine + "</membership>" + Environment.NewLine + @"<roleManager defaultProvider = ""ClientRoleProvider"" enabled = ""true"">" + Environment.NewLine + "<providers>" + Environment.NewLine + @"<add name = ""ClientRoleProvider"" type = ""System.Web.ClientServices.Providers.ClientRoleProvider, System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"" serviceUri = """" cacheTimeout = ""86400""/>" + Environment.NewLine + "</providers>" + Environment.NewLine + "</roleManager>" + Environment.NewLine + "</system.web>" + Environment.NewLine + "</configuration>");
                 File.WriteAllText(outputpath + "\\TNTScaleService.exe.config", configbaby.ToString());
-
                 lblstatus.Text = "Files Extracted to selected path and config xml updated";
                 lblstatus.Visible = Visible;
                 btninstall.Visible = Visible;
-
             }
             catch (Exception ex) {
                 lblstatus.Text = "Unable to create files, do they exist already?";
@@ -88,8 +87,24 @@ namespace TNTScaleServiceInstaller
                 Installer.Install(null);
                 Installer.Commit(null);
                 MessageBox.Show("Service Installed Successfully");
+                StartService("TnTScaleService");
             }
             catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void StartService(string ServiceName)
+        {
+            ServiceController service = new ServiceController(ServiceName);
+            try
+            {
+                service.Start();
+                service.WaitForStatus(ServiceControllerStatus.Running);
+                MessageBox.Show("Service Started");
+            }
+            catch(Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }

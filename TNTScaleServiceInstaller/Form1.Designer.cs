@@ -112,7 +112,7 @@
             this.txtlog.Name = "txtlog";
             this.txtlog.Size = new System.Drawing.Size(183, 20);
             this.txtlog.TabIndex = 5;
-            this.txtlog.Text = "C:/users/public/document/";
+            this.txtlog.Text = "C:\\users\\public\\documents\\";
             this.txtlog.Visible = false;
             // 
             // debuglabel
